@@ -3,60 +3,62 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>My Songs Player</title>
-
+<title>Pick Files / Folder – Music Player</title>
 <style>
-  :root{
-    --bg:#0f1115; --panel:#171a21; --text:#e6e6e6; --muted:#9aa4b2;
-    --brand:#4da3ff; --radius:16px;
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{
-    margin:0; background: radial-gradient(80% 120% at 20% 10%, #1a2030 0%, #0c0f14 60%, #06070a 100%);
-    color:var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  }
-  .player{
-    max-width:960px; margin:clamp(12px,4vw,36px) auto; padding:clamp(12px,3vw,24px);
-    background:#141820; border:1px solid #222a; border-radius:var(--radius);
-    box-shadow:0 10px 40px #0008, inset 0 1px 0 #fff1;
-  }
-  .now{display:grid; grid-template-columns:120px 1fr; gap:16px; align-items:center;}
-  .cover{width:120px;height:120px;border-radius:12px;background:linear-gradient(135deg,#333,#111);
-    border:1px solid #000; box-shadow: inset 0 0 30px #0008, 0 8px 24px #0009;}
-  .meta h1{margin:0 0 6px; font-size:clamp(18px,3vw,28px); font-weight:700}
-  .meta p{margin:0; color:var(--muted)}
-  .controls{margin-top:18px; display:grid; gap:12px;}
-  .buttons{display:flex; gap:10px; align-items:center;}
-  .buttons button{background:#0d1117;border:1px solid #263244;color:var(--text);
-    border-radius:999px; padding:10px 14px; cursor:pointer; transition:transform .1s, background .2s, border-color .2s;}
-  .buttons button:hover{transform:translateY(-1px); background:#111827; border-color:#2b3b52}
-  .buttons #btn-play{font-size:20px; padding:10px 16px; background:linear-gradient(180deg,#1a2333,#0d1422); border-color:#31425a}
-  .seek{display:grid; grid-template-columns:48px 1fr 48px; gap:10px; align-items:center}
+  :root{--bg:#0f1115;--panel:#171a21;--text:#e6e6e6;--muted:#9aa4b2;--brand:#4da3ff;--radius:16px}
+  *{box-sizing:border-box} html,body{height:100%}
+  body{margin:0;background:radial-gradient(80% 120% at 20% 10%, #1a2030 0%, #0c0f14 60%, #06070a 100%);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+  .player{max-width:980px;margin:clamp(12px,4vw,36px) auto;padding:clamp(12px,3vw,24px);background:#141820;border:1px solid #222a;border-radius:var(--radius);box-shadow:0 10px 40px #0008,inset 0 1px 0 #fff1}
+  .topbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .pickers{display:flex;gap:10px;flex-wrap:wrap}
+  .pickers button{background:#0f172a;border:1px solid #243148;color:#cfe9ff;padding:8px 12px;border-radius:10px;cursor:pointer}
+  .drop{border:2px dashed #2a3242;border-radius:12px;padding:12px;text-align:center;color:#bcd;opacity:.9}
+  .drop.drag{border-color:#4da3ff;opacity:1}
+  .now{display:grid;grid-template-columns:120px 1fr;gap:16px;align-items:center;margin-top:12px}
+  .cover{width:120px;height:120px;border-radius:12px;background:linear-gradient(135deg,#333,#111);border:1px solid #000;box-shadow:inset 0 0 30px #0008,0 8px 24px #0009}
+  .meta h1{margin:0 0 6px;font-size:clamp(18px,3vw,28px);font-weight:700}
+  .meta p{margin:0;color:var(--muted)}
+  .controls{margin-top:18px;display:grid;gap:12px}
+  .buttons{display:flex;gap:10px;align-items:center}
+  .buttons button{background:#0d1117;border:1px solid #263244;color:var(--text);border-radius:999px;padding:10px 14px;cursor:pointer;transition:transform .1s,background .2s,border-color .2s}
+  .buttons button:hover{transform:translateY(-1px);background:#111827;border-color:#2b3b52}
+  .buttons #btn-play{font-size:20px;padding:10px 16px;background:linear-gradient(180deg,#1a2333,#0d1422);border-color:#31425a}
+  .seek{display:grid;grid-template-columns:60px 1fr 60px;gap:10px;align-items:center}
   input[type=range]{-webkit-appearance:none;appearance:none;height:6px;border-radius:999px;background:#2a3344;outline:none}
-  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;background:var(--brand);border:2px solid #fff3;box-shadow:0 1px 4px #0008}
-  input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--brand);border:none}
-  .volume{display:flex; gap:10px; align-items:center}
-  .playlist{margin-top:20px;}
-  .playlist header{display:flex; justify-content:space-between; align-items:center;}
-  .playlist h2{margin:0 0 10px; font-size:18px; color:#d8e4f0}
-  .playlist .add button{background:#0f172a; border:1px solid #243148; color:#cfe9ff; padding:8px 12px; border-radius:10px; cursor:pointer}
-  ul#list{list-style:none; padding:0; margin:10px 0 0; border-top:1px dashed #2a3242}
-  li.track{display:grid; grid-template-columns:28px 1fr 72px; gap:10px; align-items:center; padding:10px 0; border-bottom:1px dashed #2a3242}
-  li.track .idx{color:#7c8aa0; font-variant-numeric:tabular-nums}
-  li.track .name{white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-  li.track .dur{color:#9eb0c7; text-align:right}
-  li.track.active{background:linear-gradient(90deg,#18213466,transparent); border-radius:8px}
-  @media (max-width:560px){ .now{grid-template-columns:80px 1fr} .cover{width:80px;height:80px} li.track{grid-template-columns:20px 1fr 56px} }
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--brand);border:2px solid #fff3;box-shadow:0 1px 4px #0008}
+  .volume{display:flex;gap:10px;align-items:center}
+  .playlist{margin-top:16px}
+  .toolbar{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-bottom:8px}
+  .search{flex:1;display:flex;gap:8px}
+  .search input{flex:1;min-width:160px;padding:8px 10px;border-radius:8px;border:1px solid #243148;background:#0d111a;color:#dfe9ff}
+  .search small{color:#8aa4c2}
+  ul#list{list-style:none;padding:0;margin:8px 0 0;border-top:1px dashed #2a3242}
+  li.track{display:grid;grid-template-columns:32px 1fr 88px;gap:10px;align-items:center;padding:10px 0;border-bottom:1px dashed #2a3242}
+  li.track .idx{color:#7c8aa0;font-variant-numeric:tabular-nums}
+  li.track .name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  li.track .dur{color:#9eb0c7;text-align:right}
+  li.track.active{background:linear-gradient(90deg,#18213466,transparent);border-radius:8px}
+  @media (max-width:560px){.now{grid-template-columns:80px 1fr}.cover{width:80px;height:80px}li.track{grid-template-columns:24px 1fr 64px}}
 </style>
 </head>
 <body>
   <main class="player">
+    <div class="topbar">
+      <div class="pickers">
+        <input type="file" id="pickFiles" accept="audio/*,video/mp4" multiple hidden />
+        <input type="file" id="pickFolder" accept="audio/*,video/mp4" webkitdirectory hidden />
+        <button id="btnFiles">＋ Add Files</button>
+        <button id="btnFolder">📁 Add Folder</button>
+        <button id="btnClear" title="Clear current playlist">🗑️ Clear</button>
+      </div>
+      <div class="drop" id="drop">Drag & drop files or a folder here</div>
+    </div>
+
     <section class="now">
       <div class="cover" id="cover" aria-hidden="true"></div>
       <div class="meta">
         <h1 id="title">—</h1>
-        <p id="artist">—</p>
+        <p id="artist">Choose files or a folder to start</p>
       </div>
     </section>
 
@@ -82,180 +84,257 @@
     </section>
 
     <section class="playlist">
-      <header>
-        <h2>Playlist</h2>
-        <div class="add">
-          <input type="file" id="fileInput" accept="audio/*" multiple hidden />
-          <button id="btn-add">＋ Add Songs</button>
+      <div class="toolbar">
+        <h3 style="margin:0">Playlist</h3>
+        <div class="search">
+          <input id="search" placeholder="Search by name…" />
+          <small id="count">0 items</small>
         </div>
-      </header>
+      </div>
       <ul id="list" aria-label="Song list"></ul>
     </section>
   </main>
 
+  <!-- Hidden media elements (mp4 uses <video> but stays invisible) -->
   <audio id="audio" preload="metadata"></audio>
+  <video id="video" preload="metadata" style="display:none"></video>
 
 <script>
 (() => {
+  // Elements
   const audio = document.getElementById('audio');
-  const btnPlay = document.getElementById('btn-play');
-  const btnPrev = document.getElementById('btn-prev');
-  const btnNext = document.getElementById('btn-next');
-  const btnShuffle = document.getElementById('btn-shuffle');
-  const btnRepeat = document.getElementById('btn-repeat');
-  const btnMute = document.getElementById('btn-mute');
-  const seek = document.getElementById('seek');
-  const vol = document.getElementById('vol');
-  const current = document.getElementById('current');
-  const duration = document.getElementById('duration');
-  const title = document.getElementById('title');
-  const artist = document.getElementById('artist');
-  const list = document.getElementById('list');
-  const btnAdd = document.getElementById('btn-add');
-  const fileInput = document.getElementById('fileInput');
+  const video = document.getElementById('video');
+  let media = audio; // active element
+  const el = (id)=>document.getElementById(id);
 
-  // Toggleable settings
-  let repeatMode = localStorage.getItem('repeatMode') || 'off'; // 'off'|'one'|'all'
-  let shuffleOn = localStorage.getItem('shuffleOn') === 'true';
+  const btnFiles=el('btnFiles'), btnFolder=el('btnFolder'), btnClear=el('btnClear');
+  const pickFiles=el('pickFiles'), pickFolder=el('pickFolder'), drop=el('drop');
+  const btnPlay=el('btn-play'), btnPrev=el('btn-prev'), btnNext=el('btn-next');
+  const btnShuffle=el('btn-shuffle'), btnRepeat=el('btn-repeat'), btnMute=el('btn-mute');
+  const seek=el('seek'), vol=el('vol'), current=el('current'), duration=el('duration');
+  const title=el('title'), artist=el('artist'), cover=el('cover');
+  const list=el('list'), search=el('search'), count=el('count');
 
-  // ==== EDIT THESE 4 LINES TO MATCH YOUR FILE NAMES ====
-  // Put the 4 songs in /audio/ next to index.html
-  const playlist = [
-    { title: 'Song 1', artist: 'Artist', src: 'audio/song1.mp3', cover: '' },
-    { title: 'Song 2', artist: 'Artist', src: 'audio/song2.mp3', cover: '' },
-    { title: 'Song 3', artist: 'Artist', src: 'audio/song3.mp3', cover: '' },
-    { title: 'Song 4', artist: 'Artist', src: 'audio/song4.mp3', cover: '' },
-  ];
-  // =====================================================
+  // State
+  let repeatMode='off', shuffleOn=false, userIsSeeking=false;
+  let tracks=[]; // {title, src(URL or path), ext, file?}
+  let index=-1;
 
-  const dynamicTracks = []; // from file picker
-  let index = 0, userIsSeeking = false;
+  const AUDIO_EXTS = ['.mp3','.wav','.m4a','.ogg','.aac'];
+  const VIDEO_AUDIO_EXTS = ['.mp4','.webm','.mkv']; // played via hidden <video>
+  const ALL_EXTS = [...AUDIO_EXTS, ...VIDEO_AUDIO_EXTS];
 
-  const fmtTime = s => !isFinite(s) ? '0:00' : `${Math.floor(s/60)}:${Math.floor(s%60).toString().padStart(2,'0')}`;
-  const getTracks = () => [...playlist, ...dynamicTracks];
+  function extOf(name=''){ const m = name.toLowerCase().match(/\.[^.]+$/); return m?m[0]:''; }
+  function isAudioCandidate(fileOrName){
+    const e = typeof fileOrName==='string' ? extOf(fileOrName) : extOf(fileOrName.name);
+    return ALL_EXTS.includes(e);
+  }
+  const fmtTime = s => !isFinite(s) ? '0:00' : `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
 
+  function clearPlaylist(){
+    // Revoke object URLs to avoid memory leaks
+    tracks.forEach(t => t.url && URL.revokeObjectURL(t.url));
+    tracks = []; index = -1;
+    renderList(); updateCounts();
+    title.textContent = '—';
+    artist.textContent = 'Choose files or a folder to start';
+    cover.style.background = 'linear-gradient(135deg,#333,#111)';
+    pause();
+    audio.removeAttribute('src'); video.removeAttribute('src');
+    seek.value = 0; current.textContent='0:00'; duration.textContent='0:00';
+  }
+
+  function updateCounts(){
+    const visible = list.querySelectorAll('li.track:not([hidden])').length;
+    count.textContent = `${visible} item${visible!==1?'s':''}`;
+  }
+
+  function addFilesLikeList(fileList){
+    const newOnes = [];
+    for (const f of fileList){
+      if (!isAudioCandidate(f)) continue;
+      const url = URL.createObjectURL(f);
+      const title = (f.webkitRelativePath || f.name).replace(/^.*[\\/]/,'').replace(/\.[^.]+$/,'');
+      newOnes.push({ title, src:url, url, ext: extOf(f.name), file:f });
+    }
+    tracks.push(...newOnes);
+    renderList();
+    updateCounts();
+    if (index === -1 && tracks.length){ load(0); }
+  }
+
+  // Render playlist
   function renderList(){
-    const all = getTracks();
     list.innerHTML = '';
-    all.forEach((t, i) => {
+    tracks.forEach((t,i)=>{
       const li = document.createElement('li');
-      li.className = 'track' + (i === index ? ' active' : '');
+      li.className = 'track' + (i===index?' active':'');
       li.dataset.idx = i;
       li.innerHTML = `
-        <span class="idx">${(i+1).toString().padStart(2,'0')}</span>
-        <span class="name">${t.title || (t.file?.name ?? 'Untitled')}</span>
-        <span class="dur" data-dur>--:--</span>
+        <span class="idx">${String(i+1).padStart(2,'0')}</span>
+        <span class="name">${t.title}</span>
+        <span class="dur">--:--</span>
       `;
-      li.addEventListener('click', () => { load(i); play(); });
+      li.addEventListener('click', ()=>{ load(i); play(); });
       list.appendChild(li);
+      // Preload duration quietly
+      const probe = document.createElement( VIDEO_AUDIO_EXTS.includes(t.ext)? 'video' : 'audio' );
+      probe.preload = 'metadata'; probe.src = t.src;
+      probe.addEventListener('loadedmetadata', ()=>{
+        const d = li.querySelector('.dur'); if (d) d.textContent = fmtTime(probe.duration);
+      }, { once:true });
     });
+    filterList(); // apply current search
+  }
+
+  function filterList(){
+    const q = search.value.trim().toLowerCase();
+    [...list.children].forEach(li=>{
+      const name = li.querySelector('.name').textContent.toLowerCase();
+      li.hidden = q && !name.includes(q);
+    });
+    updateCounts();
+  }
+
+  function useMediaFor(ext){
+    // choose which element will handle playback
+    if (VIDEO_AUDIO_EXTS.includes(ext)) { media = video; video.style.display='none'; }
+    else { media = audio; }
   }
 
   function load(i){
+    if (i<0 || i>=tracks.length) return;
     index = i;
-    const track = getTracks()[index];
-    audio.src = track.src || track.url;
-    audio.loop = (repeatMode === 'one');
-    title.textContent = track.title || (track.file?.name ?? 'Untitled');
-    artist.textContent = track.artist || '';
+    const t = tracks[index];
+    pause(); // stop both
+    useMediaFor(t.ext);
+    audio.pause(); video.pause();
+    audio.removeAttribute('src'); video.removeAttribute('src');
+    media.src = t.src;
 
-    document.getElementById('cover').style.background = track.cover
-      ? `center / cover url('${track.cover}')`
-      : 'linear-gradient(135deg,#333,#111)';
+    title.textContent = t.title || 'Untitled';
+    artist.textContent = t.file?.webkitRelativePath ? t.file.webkitRelativePath.split('/')[0] : '';
+    cover.style.background = 'linear-gradient(135deg,#333,#111)';
 
-    [...document.querySelectorAll('li.track')].forEach((li, idx)=> li.classList.toggle('active', idx===index));
+    // highlight active
+    [...list.children].forEach((li,idx)=>li.classList.toggle('active', idx===index));
   }
 
-  function play(){ audio.play(); btnPlay.textContent = '⏸️'; }
-  function pause(){ audio.pause(); btnPlay.textContent = '▶️'; }
-  function toggle(){ audio.paused ? play() : pause(); }
+  function play(){ if (index<0 && tracks.length){ load(0); } media.play(); btnPlay.textContent='⏸️'; }
+  function pause(){ media.pause(); btnPlay.textContent='▶️'; }
 
   function next(){
-    const tracks = getTracks();
+    if (!tracks.length) return;
     if (shuffleOn){
-      let r; do { r = Math.floor(Math.random()*tracks.length); } while (r === index && tracks.length>1);
-      index = r;
+      let r; do { r = Math.floor(Math.random()*tracks.length); } while (tracks.length>1 && r===index);
+      load(r);
     } else {
-      index = (index + 1) % tracks.length;
+      load((index+1) % tracks.length);
     }
-    load(index); play();
+    play();
   }
-  function prev(){
-    const tracks = getTracks();
-    index = (index - 1 + tracks.length) % tracks.length;
-    load(index); play();
-  }
+  function prev(){ if (!tracks.length) return; load((index-1+tracks.length)%tracks.length); play(); }
 
-  function cycleRepeat(){
-    repeatMode = repeatMode === 'off' ? 'one' : repeatMode === 'one' ? 'all' : 'off';
-    localStorage.setItem('repeatMode', repeatMode);
-    audio.loop = (repeatMode === 'one');
-    btnRepeat.dataset.mode = repeatMode;
+  // Events wiring
+  btnFiles.onclick = ()=> pickFiles.click();
+  btnFolder.onclick = ()=> pickFolder.click();
+  btnClear.onclick = clearPlaylist;
+
+  pickFiles.onchange = e => addFilesLikeList(e.target.files);
+  pickFolder.onchange = e => addFilesLikeList(e.target.files); // webkitdirectory gives all files
+
+  // Drag & drop (files or a folder)
+  ;['dragenter','dragover'].forEach(evt=>{
+    drop.addEventListener(evt, e=>{ e.preventDefault(); e.dataTransfer.dropEffect='copy'; drop.classList.add('drag'); });
+  });
+  ;['dragleave','drop'].forEach(evt=>{
+    drop.addEventListener(evt, e=>{ e.preventDefault(); drop.classList.remove('drag'); });
+  });
+  drop.addEventListener('drop', e=>{
+    const items = e.dataTransfer.items;
+    if (items && items[0] && items[0].webkitGetAsEntry){
+      // folder-aware (Chrome/Edge)
+      const entries = [...items].map(it=>it.webkitGetAsEntry()).filter(Boolean);
+      const files = [];
+      let pending = 0;
+      function readEntry(entry, path=''){
+        if (entry.isFile){
+          pending++;
+          entry.file(file=>{ file.webkitRelativePath = path + file.name; files.push(file); if (!--pending) addFilesLikeList(files); });
+        } else if (entry.isDirectory){
+          const reader = entry.createReader();
+          pending++;
+          reader.readEntries(ents=>{
+            ents.forEach(en=>readEntry(en, path + entry.name + '/'));
+            if (!--pending) addFilesLikeList(files);
+          });
+        }
+      }
+      entries.forEach(en=>readEntry(en));
+    } else {
+      // fallback: plain files
+      addFilesLikeList(e.dataTransfer.files);
+    }
+  });
+
+  // Transport / controls
+  btnPlay.onclick = ()=> media.paused ? play() : pause();
+  btnPrev.onclick = prev; btnNext.onclick = next;
+  btnMute.onclick = ()=>{ media.muted = !media.muted; btnMute.textContent = media.muted ? '🔇' : '🔊'; };
+  btnShuffle.onclick = ()=>{ shuffleOn = !shuffleOn; btnShuffle.classList.toggle('on', shuffleOn); };
+  btnRepeat.onclick = ()=>{
+    repeatMode = repeatMode==='off' ? 'one' : repeatMode==='one' ? 'all' : 'off';
     btnRepeat.title = `Repeat (${repeatMode})`;
-  }
-  function setShuffle(v){ shuffleOn = v; localStorage.setItem('shuffleOn', v); btnShuffle.classList.toggle('on', v); }
+    media.loop = (repeatMode==='one');
+  };
 
-  // Wire up UI
-  btnPlay.addEventListener('click', toggle);
-  btnPrev.addEventListener('click', prev);
-  btnNext.addEventListener('click', next);
-  btnShuffle.addEventListener('click', ()=> setShuffle(!shuffleOn));
-  btnRepeat.addEventListener('click', cycleRepeat);
-  btnMute.addEventListener('click', ()=>{ audio.muted = !audio.muted; btnMute.textContent = audio.muted ? '🔇' : '🔊'; });
-
-  seek.addEventListener('input', ()=>{ userIsSeeking = true; });
+  vol.oninput = ()=>{ audio.volume = +vol.value; video.volume = +vol.value; };
+  seek.addEventListener('input', ()=> userIsSeeking = true);
   seek.addEventListener('change', ()=>{
-    const pos = (seek.value / 100) * (audio.duration || 0);
-    audio.currentTime = pos; userIsSeeking = false;
-  });
-  vol.addEventListener('input', ()=>{ audio.volume = +vol.value; });
-
-  audio.addEventListener('loadedmetadata', ()=>{
-    duration.textContent = fmtTime(audio.duration);
-    const durEl = list.querySelector(`li.track:nth-child(${index+1}) .dur`);
-    if (durEl) durEl.textContent = fmtTime(audio.duration);
-  });
-  audio.addEventListener('timeupdate', ()=>{
-    if (!userIsSeeking && isFinite(audio.duration)){
-      seek.value = (audio.currentTime / audio.duration) * 100 || 0;
-    }
-    current.textContent = fmtTime(audio.currentTime);
-  });
-  audio.addEventListener('ended', ()=>{
-    if (repeatMode === 'one'){ play(); return; }
-    const last = index === getTracks().length - 1;
-    if (repeatMode === 'all' || !last){ next(); } else { pause(); }
+    const pos = (seek.value/100) * (media.duration || 0);
+    media.currentTime = pos; userIsSeeking = false;
   });
 
-  // Keyboard shortcuts (outside inputs)
+  function hook(el){
+    el.addEventListener('loadedmetadata', ()=>{
+      duration.textContent = fmtTime(el.duration);
+      // update per-item duration in list
+      if (index>=0){
+        const li = list.children[index];
+        if (li) li.querySelector('.dur').textContent = fmtTime(el.duration);
+      }
+    });
+    el.addEventListener('timeupdate', ()=>{
+      if (!userIsSeeking && isFinite(el.duration)){
+        seek.value = (el.currentTime / el.duration) * 100 || 0;
+      }
+      current.textContent = fmtTime(el.currentTime);
+    });
+    el.addEventListener('ended', ()=>{
+      if (repeatMode==='one'){ play(); return; }
+      if (repeatMode==='all' || index < tracks.length-1){ next(); } else { pause(); }
+    });
+  }
+  hook(audio); hook(video);
+
+  // Keyboard shortcuts
   document.addEventListener('keydown', (e)=>{
     if (['INPUT','TEXTAREA'].includes(e.target.tagName)) return;
-    if (e.code === 'Space'){ e.preventDefault(); toggle(); }
-    else if (e.key === 'ArrowRight'){ next(); }
-    else if (e.key === 'ArrowLeft'){ prev(); }
-    else if (e.key.toLowerCase() === 'm'){ audio.muted = !audio.muted; btnMute.textContent = audio.muted ? '🔇' : '🔊'; }
-    else if (e.key.toLowerCase() === 's'){ setShuffle(!shuffleOn); }
-    else if (e.key.toLowerCase() === 'r'){ cycleRepeat(); }
-  });
-
-  // Add local files
-  btnAdd.addEventListener('click', ()=> fileInput.click());
-  fileInput.addEventListener('change', (e)=>{
-    const files = [...e.target.files].filter(f => f.type.startsWith('audio/'));
-    for (const file of files){
-      const url = URL.createObjectURL(file);
-      dynamicTracks.push({ title: file.name.replace(/\.[^.]+$/, ''), artist:'', url, file });
+    if (e.code==='Space'){ e.preventDefault(); media.paused ? play() : pause(); }
+    else if (e.key==='ArrowRight'){ next(); }
+    else if (e.key==='ArrowLeft'){ prev(); }
+    else if (e.key.toLowerCase()==='m'){ media.muted = !media.muted; btnMute.textContent = media.muted ? '🔇' : '🔊'; }
+    else if (e.key.toLowerCase()==='s'){ btnShuffle.click(); }
+    else if (e.key.toLowerCase()==='r'){ btnRepeat.click(); }
+    else if (e.key.toLowerCase()==='l'){ // jump to currently playing
+      if (index>=0){ const li=list.children[index]; li?.scrollIntoView({behavior:'smooth',block:'center'}); }
     }
-    renderList();
-    if (files.length && audio.paused){ load(getTracks().length - files.length); play(); }
   });
 
-  // Init
-  renderList();
-  load(0);
+  // Search filter
+  search.addEventListener('input', filterList);
 })();
 </script>
 </body>
 </html>
-
 
